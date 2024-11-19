@@ -9,6 +9,9 @@ from typing import List, Optional, Tuple
 import logging
 from collections import deque
 
+from pprint import pprint
+
+
 import ell
 import json
 
@@ -26,22 +29,22 @@ logging.basicConfig(
 )
 
 
-ell.init(store="./logdir", verbose=True)
+ell.init(store="./logdir")
 
 
 # %%
 
 # parameters
 
-FILE_PATH = "data/subtitles/Le.Comte.de.Monte-Cristo.2024.en.V2.srt"
+FILE_NAME = "Le.Comte.de.Monte-Cristo.2024.FRENCH.1080p.WEB.H264-FW.srt"
+FILE_PATH = f"data/subtitles/{FILE_NAME}"
 OUTPUT_DIR = "outputs"
 
 TARGET_LANGUAGE = "CN"
-BATCH_SIZE = 50
+BATCH_SIZE = 100
 CONTEXT_LINES = 5
 
 LLM_MODEL = "gpt-4o"
-
 
 # %%
 
@@ -57,11 +60,16 @@ class Terminology(BaseModel):
     )
 
 
+class Translation(BaseModel):
+    original: str
+    translation: str
+
+
 class Translations(BaseModel):
     terminologies: List[Terminology] = Field(
         description="Dictionary mapping original terms (names, locations, etc.) to their translations",
     )
-    translations: List[str] = Field(
+    translations: List[Translation] = Field(
         description="List of translated subtitle lines in chronological order",
     )
 
@@ -230,30 +238,30 @@ def translate(
     • Adapt cultural references for {TARGET_LANGUAGE} audience
     • Maintain consistency with provided TERMINOLOGY
     • Reflect character relationships accurately
-    • Ensure translation lines match the original in quantity, merge if necessary, but make sure to fill in a "..." for the missing parts in translations
+    • Ensure translations have the same numbers of the original subtitlescle
 
     [OUTPUT FORMAT]
     1. terms: List of term translations, only extracting characters names and locations
     2. lines: List of translated subtitles
+    """
 
-    Note: Keep a 1:1 line ratio and use \n for line breaks."""
     return f"""[SOURCE]
 Lines to translate:
-{json.dumps(lines)}
+{json.dumps(lines, indent=2, ensure_ascii=False)}
 
 [TARGET LANGUAGE]
 {TARGET_LANGUAGE}
 
 [CONTEXT]
 Previous lines:
-{json.dumps(previous_lines)}
+{json.dumps(previous_lines, indent=2, ensure_ascii=False)}
 
 Following lines:
-{json.dumps(following_lines)}
+{json.dumps(following_lines, indent=2, ensure_ascii=False)}
 
 [EXISTING TERMINOLOGY TRANSLATIONS]
 Previously translated terms:
-{json.dumps(previous_translations_terms)}
+{json.dumps(previous_translations_terms, indent=2, ensure_ascii=False)}
 """
 
 
@@ -284,19 +292,21 @@ def translate_subtitles(jobs: List[TranslationJob], output_path: str):
             previous_translations_terms[term.original] = term.translation
 
         # Store translations with metadata
-        for number, timestamp, orig_text, trans_text in zip(
+        for number, timestamp, orig_text, translation in zip(
             job.numbers,
             job.timestamps,
             job.current_lines,
             translation_parsed.translations,
         ):
-            all_translations.append((number, timestamp, trans_text, orig_text))
+            all_translations.append(
+                (number, timestamp, translation.original, translation.translation)
+            )
 
     # Sort and write to file
     all_translations.sort(key=lambda x: x[0])
 
     with open(output_path, "w", encoding="utf-8") as f:
-        for number, timestamp, trans_text, orig_text in all_translations:
+        for number, timestamp, orig_text, trans_text in all_translations:
             f.write(f"{number}\n")
             f.write(f"{timestamp}\n")
             f.write(f"{trans_text}\n")
@@ -307,15 +317,12 @@ def translate_subtitles(jobs: List[TranslationJob], output_path: str):
 
 
 if __name__ == "__main__":
-    from pprint import pprint
 
     test = False
-
-    print(f"{Translations.model_json_schema()}")
 
     translation_jobs = load_video_subtitles(FILE_PATH)
 
     if test:
-        translation_jobs = translation_jobs[:5]
+        translation_jobs = translation_jobs[:4]
 
-    translate_subtitles(translation_jobs, f"{OUTPUT_DIR}/translated_subtitles.srt")
+    translate_subtitles(translation_jobs, f"{OUTPUT_DIR}/{FILE_NAME}")
