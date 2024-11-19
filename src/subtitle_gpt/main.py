@@ -26,7 +26,6 @@ FILE_PATH = "data/subtitles/The.Count.Of.Monte-Cristo.2024.1080p.BluRay.x264.AAC
 OUTPUT_DIR = "outputs/tmp"
 
 TARGET_LANGUAGE = "CN"
-SOURCE_LANGUAGE = "EN"
 MOVIE_TITLE = "Le Comte de Monte-Cristo"
 MOVIE_GENRE = "Drama/Historical"
 LLM_MODEL = "gpt-4o-mini"
@@ -39,7 +38,7 @@ BATCH_SIZE = 10
 
 # %%
 
-SYSTEM_PROMPT = """You are a professional subtitle translator specializing in {source_language} to {target_language} translations.
+SYSTEM_PROMPT = """You are a professional subtitle translator specializing in {target_language} translations.
 You must provide precise, culturally-appropriate translations that preserve the original meaning, tone, and emotional impact.
 
 Content Information:
@@ -192,7 +191,6 @@ def translate_subtitles(translation_jobs: List[TranslationJob]) -> List[Translat
 
     for job in translation_jobs:
         system_prompt = SYSTEM_PROMPT.format(
-            source_language=SOURCE_LANGUAGE,
             target_language=TARGET_LANGUAGE,
             movie_title=MOVIE_TITLE,
             genre=MOVIE_GENRE,

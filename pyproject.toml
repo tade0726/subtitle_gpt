@@ -8,8 +8,14 @@ dependencies = [
     "black>=24.10.0",
     "openai>=1.54.4",
     "aiofiles>=24.1.0",
+    "ell-ai>=0.0.14",
 ]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = [
+    "jupyter>=1.1.1",
+]
