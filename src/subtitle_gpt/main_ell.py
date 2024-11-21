@@ -317,7 +317,7 @@ def translate_subtitle(file_path: str, output_path: str):
     translation_jobs = load_video_subtitles(file_path)
     # extra file_name
     file_name = Path(file_path).stem
-    translate_subtitles(translation_jobs, f"{output_path}/{file_name}")
+    translate_subtitles(translation_jobs, f"{output_path}/{file_name}.str")
 
 
 def process_subtitle(sub_file):
@@ -328,7 +328,7 @@ def process_subtitle(sub_file):
 
 def scan_subtitles(file_dir: str):
     """Process subtitles in parallel using multiprocessing"""
-    subtitle_files = glob.glob(f"{file_dir}/*.srt")
+    subtitle_files = glob.glob(f"{file_dir}/*.str")
     logging.info(f"Found {len(subtitle_files)} subtitle files to process")
 
     # Use number of CPU cores for parallel processing
