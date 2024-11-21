@@ -12,6 +12,7 @@ from pprint import pprint
 import glob
 from tqdm import tqdm
 from multiprocessing import Pool, cpu_count
+import os
 
 import ell
 import json
@@ -37,7 +38,7 @@ ell.init(store="./logdir")
 
 # parameters
 
-SUB_DIR = "data/subtitles/"
+SUB_DIR = "./data/subtitles"
 OUTPUT_DIR = "outputs"
 
 TARGET_LANGUAGE = "CN"
@@ -229,40 +230,67 @@ def translate(
     following_lines: List[str],
     previous_translations_terms: dict[str, str],
 ) -> Translations:
-    """As a professional {TARGET_LANGUAGE} subtitle translator, your task is to translate subtitles while maintaining meaning, tone, and cultural relevance.
+    """As a professional {TARGET_LANGUAGE} subtitle translator with deep linguistic and cultural expertise, your mission is to craft translations that transcend literal meaning and capture the essence of the original dialogue.
+
+    [TRANSLATION PHILOSOPHY]
+    - Translation is an art of cultural and emotional transference, not just word-for-word conversion
+    - Prioritize communicative intent over literal accuracy
+    - Respect the original text's subtext, tone, and dramatic nuances
 
     [KEY REQUIREMENTS]
-    • Match the original tone and emotion (formal/casual)
-    • Use appropriate {TARGET_LANGUAGE} honorifics
-    • Ensure dialogue flows naturally within context
-    • Adapt cultural references for {TARGET_LANGUAGE} audience
-    • Maintain consistency with provided TERMINOLOGY
-    • Reflect character relationships accurately
-    • Ensure translations have the same numbers of the original subtitlescle
+    - Maintain narrative coherence by deeply analyzing the context of previous and following lines
+    - Reconstruct character voices with linguistic precision, capturing individual speech patterns
+    - Dynamically adapt tone to match the emotional landscape of each scene
+    - Seamlessly integrate cultural references, transforming them for {TARGET_LANGUAGE} audience comprehension
+    - Preserve subtle emotional undertones and implied meanings
+    - Ensure precise temporal and contextual alignment with original dialogue
+    - Implement consistent terminology management for characters, locations, and specialized vocabulary
+    - Meticulously preserve subtitle line structure and timing
+    - Eliminate potential linguistic ambiguities through contextual translation
 
-    [OUTPUT FORMAT]
-    1. terms: List of term translations, only extracting characters names and locations
-    2. lines: List of translated subtitles
+    [CONTEXTUAL TRANSLATION STRATEGY]
+    - Conduct a holistic analysis of conversation flow using provided context lines
+    - Decode implicit cultural and emotional subtext in ambiguous expressions
+    - Establish and maintain a coherent linguistic thread across character interactions
+    - Validate each translation against broader narrative and character development context
+    - Anticipate potential audience interpretation challenges
+
+    [LINGUISTIC ADAPTATION PRINCIPLES]
+    - Employ {TARGET_LANGUAGE} idiomatic expressions that mirror original intent
+    - Balance between source language structure and natural {TARGET_LANGUAGE} syntax
+    - Adjust register and formality to match character relationships and social dynamics
+    - Resolve potential cultural translation challenges creatively and sensitively
+
+    [OUTPUT CONSTRAINTS]
+    1. terms: Precise translations of character names, locations, and significant terminology
+       - Ensure terminological consistency across the entire translation
+    2. lines: Contextually rich, emotionally resonant subtitle translations
+       - Exact line count matching original subtitles
+       - Preserving original dramatic and communicative essence
+
+    [QUALITY VERIFICATION]
+    - Cross-reference translations with provided context to ensure holistic accuracy
+    - Validate that no critical narrative or emotional nuances are lost in translation
     """
 
-    return f"""[SOURCE]
-Lines to translate:
-{json.dumps(lines, indent=2, ensure_ascii=False)}
+    return f"""
+        [SOURCE]
+        Lines to translate:
+        {json.dumps(lines, indent=2, ensure_ascii=False)}
 
-[TARGET LANGUAGE]
-{TARGET_LANGUAGE}
+        [TARGET LANGUAGE]
+        {TARGET_LANGUAGE}
 
-[CONTEXT]
-Previous lines:
-{json.dumps(previous_lines, indent=2, ensure_ascii=False)}
+        [CONTEXT]
+        Previous lines:
+        {json.dumps(previous_lines, indent=2, ensure_ascii=False)}
 
-Following lines:
-{json.dumps(following_lines, indent=2, ensure_ascii=False)}
+        Following lines:
+        {json.dumps(following_lines, indent=2, ensure_ascii=False)}
 
-[EXISTING TERMINOLOGY TRANSLATIONS]
-Previously translated terms:
-{json.dumps(previous_translations_terms, indent=2, ensure_ascii=False)}
-"""
+        [EXISTING TERMINOLOGY TRANSLATIONS]
+        Previously translated terms:
+        {json.dumps(previous_translations_terms, indent=2, ensure_ascii=False)}"""
 
 
 def translate_subtitles(jobs: List[TranslationJob], output_path: str):
@@ -328,7 +356,7 @@ def process_subtitle(sub_file):
 
 def scan_subtitles(file_dir: str):
     """Process subtitles in parallel using multiprocessing"""
-    subtitle_files = glob.glob(f"{file_dir}/*.str")
+    subtitle_files = glob.glob(f"{file_dir}/*.srt")
     logging.info(f"Found {len(subtitle_files)} subtitle files to process")
 
     # Use number of CPU cores for parallel processing
