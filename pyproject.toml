@@ -9,6 +9,7 @@ dependencies = [
     "openai>=1.54.4",
     "aiofiles>=24.1.0",
     "ell-ai>=0.0.14",
+    "tqdm>=4.67.0",
 ]
 
 [build-system]

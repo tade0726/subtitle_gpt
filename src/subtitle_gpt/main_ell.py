@@ -8,9 +8,10 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 import logging
 from collections import deque
-
 from pprint import pprint
-
+import glob
+from tqdm import tqdm
+from multiprocessing import Pool, cpu_count
 
 import ell
 import json
@@ -36,8 +37,7 @@ ell.init(store="./logdir")
 
 # parameters
 
-FILE_NAME = "Le.Comte.de.Monte-Cristo.2024.FRENCH.1080p.WEB.H264-FW.srt"
-FILE_PATH = f"data/subtitles/{FILE_NAME}"
+SUB_DIR = "data/subtitles/"
 OUTPUT_DIR = "outputs"
 
 TARGET_LANGUAGE = "CN"
@@ -313,16 +313,34 @@ def translate_subtitles(jobs: List[TranslationJob], output_path: str):
             f.write(f"{orig_text}\n\n")
 
 
+def translate_subtitle(file_path: str, output_path: str):
+    translation_jobs = load_video_subtitles(file_path)
+    # extra file_name
+    file_name = Path(file_path).stem
+    translate_subtitles(translation_jobs, f"{output_path}/{file_name}")
+
+
+def process_subtitle(sub_file):
+    """Process a single subtitle file"""
+    logging.info(f"Starting translation for: {Path(sub_file).name}")
+    return translate_subtitle(sub_file, OUTPUT_DIR)
+
+
+def scan_subtitles(file_dir: str):
+    """Process subtitles in parallel using multiprocessing"""
+    subtitle_files = glob.glob(f"{file_dir}/*.srt")
+    logging.info(f"Found {len(subtitle_files)} subtitle files to process")
+
+    # Use number of CPU cores for parallel processing
+    num_processes = cpu_count()
+    logging.info(f"Using {num_processes} processes for parallel processing")
+
+    with Pool(processes=num_processes) as pool:
+        list(pool.imap_unordered(process_subtitle, subtitle_files))
+
+
 # %%
 
 
 if __name__ == "__main__":
-
-    test = False
-
-    translation_jobs = load_video_subtitles(FILE_PATH)
-
-    if test:
-        translation_jobs = translation_jobs[:4]
-
-    translate_subtitles(translation_jobs, f"{OUTPUT_DIR}/{FILE_NAME}")
+    scan_subtitles(SUB_DIR)

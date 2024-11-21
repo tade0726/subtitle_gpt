@@ -1765,6 +1765,7 @@ dependencies = [
     { name = "black" },
     { name = "ell-ai" },
     { name = "openai" },
+    { name = "tqdm" },
 ]
 
 [package.dev-dependencies]
@@ -1778,6 +1779,7 @@ requires-dist = [
     { name = "black", specifier = ">=24.10.0" },
     { name = "ell-ai", specifier = ">=0.0.14" },
     { name = "openai", specifier = ">=1.54.4" },
+    { name = "tqdm", specifier = ">=4.67.0" },
 ]
 
 [package.metadata.requires-dev]
