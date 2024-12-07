@@ -345,7 +345,7 @@ def translate_subtitle(file_path: str, output_path: str):
     translation_jobs = load_video_subtitles(file_path)
     # extra file_name
     file_name = Path(file_path).stem
-    translate_subtitles(translation_jobs, f"{output_path}/{file_name}.str")
+    translate_subtitles(translation_jobs, f"{output_path}/{file_name}.srt")
 
 
 def process_subtitle(sub_file):
