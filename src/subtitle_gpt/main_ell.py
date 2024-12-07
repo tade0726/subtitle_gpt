@@ -41,7 +41,7 @@ ell.init(store="./logdir")
 SUB_DIR = "./data/subtitles"
 OUTPUT_DIR = "outputs"
 
-TARGET_LANGUAGE = "CN"
+TARGET_LANGUAGE = "简体中文"
 BATCH_SIZE = 100
 CONTEXT_LINES = 5
 
